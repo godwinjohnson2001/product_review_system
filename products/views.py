@@ -14,11 +14,10 @@ class RegisterView(generics.CreateAPIView):
     permission_classes = [AllowAny]
 
 class LoginView(APIView):
-    permission_classes = [AllowAny]
     def post(self, request):
         serializer = LoginSerializer(data=request.data)
         if serializer.is_valid():
-            user = serializer.validated_data
+            user = serializer.validated_data['user']  # retrieve user
             token, _ = Token.objects.get_or_create(user=user)
             return Response({"token": token.key})
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

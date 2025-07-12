@@ -19,13 +19,14 @@ class RegisterSerializer(serializers.ModelSerializer):
 
 class LoginSerializer(serializers.Serializer):
     username = serializers.CharField()
-    password = serializers.CharField()
+    password = serializers.CharField(write_only=True)  # ensure password is not exposed
 
     def validate(self, data):
-        user = authenticate(**data)
+        user = authenticate(username=data['username'], password=data['password'])
         if user and user.is_active:
-            return user
-        raise serializers.ValidationError("Invalid Credentials")
+            data['user'] = user  # include user in validated data
+            return data
+        raise serializers.ValidationError("Invalid credentials")
 
 class ProductSerializer(serializers.ModelSerializer):
     average_rating = serializers.FloatField(read_only=True)
